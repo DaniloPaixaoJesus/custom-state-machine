@@ -1,201 +1,204 @@
-# Tasks: simple-state-machine
+# Tarefas: simple-state-machine
 
-**Input**: Design documents from `/specs/001-simple-state-machine/`
+**Input**: Documentos de design de `/specs/001-simple-state-machine/`
 
-**Prerequisites**: plan.md (required), spec.md (required), research.md, data-model.md, contracts/, quickstart.md
+**Pré-requisitos**: plan.md (obrigatório), spec.md (obrigatório), research.md, data-model.md, contracts/, quickstart.md
 
-**Tests**: Tests are mandatory for this feature by specification and constitution.
+**Testes**: Testes são obrigatórios para esta feature por especificação e constituição.
 
-**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
+**Organização**: As tarefas são agrupadas por história de usuário para permitir implementação independente e teste de cada história.
 
-## Phase 1: Setup (Shared Infrastructure)
+## Fase 1: Setup (Infraestrutura Compartilhada)
 
-**Purpose**: Initialize Maven project structure and baseline build/test configuration.
+**Propósito**: Inicializar estrutura do projeto Maven e configuração de build/teste de referência.
 
-- [X] T001 Create Maven project descriptor with Java 21 settings in pom.xml
-- [X] T002 Create source and test package directories under src/main/java/br/com/danilo/customstatemachine/ and src/test/java/br/com/danilo/customstatemachine/
-- [X] T003 [P] Configure JUnit 5, AssertJ (optional usage), and Surefire plugin in pom.xml
-- [X] T004 [P] Add project .gitignore entries for Maven build outputs in .gitignore
-- [X] T005 Add feature usage and local test execution section in README.md
-
----
-
-## Phase 2: Foundational (Blocking Prerequisites)
-
-**Purpose**: Implement shared infrastructure required by all user stories.
-
-**CRITICAL**: No user story implementation starts before this phase is complete.
-
-- [X] T006 Create transition status/result contract in src/main/java/br/com/danilo/customstatemachine/runtime/TransitionResult.java
-- [X] T007 Create definition validator skeleton for shared invariants in src/main/java/br/com/danilo/customstatemachine/validation/DefinitionValidator.java
-- [X] T008 [P] Create guard and context abstractions in src/main/java/br/com/danilo/customstatemachine/model/Guard.java and src/main/java/br/com/danilo/customstatemachine/model/TransitionContext.java
-- [X] T009 Create reusable test fixtures for canonical states/events in src/test/java/br/com/danilo/customstatemachine/support/StateMachineFixtures.java
-- [X] T010 Establish contract test class shell in src/test/java/br/com/danilo/customstatemachine/contract/StateMachineContractTest.java
-
-**Checkpoint**: Shared runtime and test foundations are ready.
+- [ ] T001 Criar descritor de projeto Maven com configurações Java 21 em pom.xml
+- [ ] T002 Criar diretórios de pacotes src e test em src/main/java/br/com/danilo/customstatemachine/ e src/test/java/br/com/danilo/customstatemachine/
+- [ ] T003 [P] Configurar JUnit 5, AssertJ (uso opcional) e plugin Surefire em pom.xml
+- [ ] T004 [P] Adicionar entradas .gitignore do projeto para saídas de build Maven em .gitignore
+- [ ] T005 Adicionar seção de uso de feature e execução de teste local em README.md
 
 ---
 
-## Phase 3: User Story 1 - Define A Deterministic Machine (Priority: P1) MVP
+## Fase 2: Fundacional (Pré-requisitos Bloqueadores)
 
-**Goal**: Provide explicit immutable machine definition with duplicate transition detection.
+**Propósito**: Implementar infraestrutura compartilhada exigida por todas as histórias de usuário.
 
-**Independent Test**: Build a machine definition for DRAFT/SUBMITTED/APPROVED/REJECTED and verify immutability plus duplicate transition rejection.
+**CRÍTICO**: Nenhuma implementação de história de usuário começa antes desta fase estar completa.
 
-### Tests for User Story 1
+- [ ] T006 Criar contrato de status/resultado de consulta em src/main/java/br/com/danilo/customstatemachine/query/AvailableEventResult.java
+- [ ] T007 Criar esqueléto de validador de definição para invariantes compartilhados em src/main/java/br/com/danilo/customstatemachine/validation/DefinitionValidator.java
+- [ ] T008 [P] Criar abstrações de guard e context em src/main/java/br/com/danilo/customstatemachine/model/Guard.java e src/main/java/br/com/danilo/customstatemachine/model/GuardContext.java
+- [ ] T009 Criar fixtures de teste reutilizáveis para states/events canônicos em src/test/java/br/com/danilo/customstatemachine/support/StateMachineFixtures.java
+- [ ] T010 Estabelecer shell de classe de teste de contrato em src/test/java/br/com/danilo/customstatemachine/contract/StateMachineQueryContractTest.java
 
-- [X] T011 [P] [US1] Add immutable definition and initial-state validation tests in src/test/java/br/com/danilo/customstatemachine/unit/DefinitionValidationTest.java
-- [X] T012 [P] [US1] Add duplicate transition detection tests in src/test/java/br/com/danilo/customstatemachine/unit/DuplicateTransitionDetectionTest.java
-- [X] T013 [P] [US1] Add contract tests for explicit domain concepts in src/test/java/br/com/danilo/customstatemachine/contract/StateMachineContractTest.java
-
-### Implementation for User Story 1
-
-- [X] T014 [P] [US1] Implement immutable State value object in src/main/java/br/com/danilo/customstatemachine/model/State.java
-- [X] T015 [P] [US1] Implement immutable Event value object in src/main/java/br/com/danilo/customstatemachine/model/Event.java
-- [X] T016 [P] [US1] Implement immutable Transition with optional Guard in src/main/java/br/com/danilo/customstatemachine/model/Transition.java
-- [X] T017 [US1] Implement immutable StateMachineDefinition constructor and getters in src/main/java/br/com/danilo/customstatemachine/model/StateMachineDefinition.java
-- [X] T018 [US1] Implement duplicate and membership rules in src/main/java/br/com/danilo/customstatemachine/validation/DefinitionValidator.java
-
-**Checkpoint**: Machine definition is explicit, immutable, and validated.
+**Checkpoint**: Fundos de runtime e teste compartilhados estão prontos.
 
 ---
 
-## Phase 4: User Story 2 - Move Between States Safely (Priority: P2)
+## Fase 3: História de Usuário 1 - Definir Metadados Declarativos Imutáveis (Prioridade: P1) MVP
 
-**Goal**: Execute valid transitions at runtime with guard-aware behavior.
+**Objetivo**: Fornecer definição de máquina explícita e imutável com detecção de regras duplicadas.
 
-**Independent Test**: Start at DRAFT, fire SUBMIT then APPROVE, and verify successful state progression and guard behavior.
+**Teste Independente**: Construir definição de máquina para DRAFT/SUBMITTED/APPROVED/REJECTED e verificar imutabilidade mais rejeição de regra duplicada.
 
-### Tests for User Story 2
+### Testes para História de Usuário 1
 
-- [X] T019 [P] [US2] Add happy-path integration flow test for DRAFT->SUBMITTED->APPROVED in src/test/java/br/com/danilo/customstatemachine/integration/ExampleFlowIntegrationTest.java
-- [X] T020 [P] [US2] Add guard approval and denial unit tests in src/test/java/br/com/danilo/customstatemachine/unit/GuardEvaluationTest.java
-- [X] T021 [P] [US2] Add invalid and missing transition unit tests in src/test/java/br/com/danilo/customstatemachine/unit/InvalidTransitionHandlingTest.java
+- [ ] T011 [P] [US1] Adicionar testes de definição imutável e validação de estado inicial em src/test/java/br/com/danilo/customstatemachine/unit/DefinitionValidationTest.java
+- [ ] T012 [P] [US1] Adicionar testes de detecção de regra duplicada em src/test/java/br/com/danilo/customstatemachine/unit/DuplicateRuleDetectionTest.java
+- [ ] T013 [P] [US1] Adicionar testes de contrato para conceitos de domínio explícitos em src/test/java/br/com/danilo/customstatemachine/contract/StateMachineQueryContractTest.java
 
-### Implementation for User Story 2
+### Implementação para História de Usuário 1
 
-- [X] T022 [US2] Implement StateMachine runtime holder and current-state initialization in src/main/java/br/com/danilo/customstatemachine/runtime/StateMachine.java
-- [X] T023 [US2] Implement transition lookup by source-state and event in src/main/java/br/com/danilo/customstatemachine/runtime/StateMachine.java
-- [X] T024 [US2] Implement guard evaluation and transition application flow in src/main/java/br/com/danilo/customstatemachine/runtime/StateMachine.java
-- [X] T025 [US2] Finalize TransitionResult outcome mapping for success, invalid transition, and guard denial in src/main/java/br/com/danilo/customstatemachine/runtime/TransitionResult.java
+- [ ] T014 [P] [US1] Implementar objeto de valor imutável State em src/main/java/br/com/danilo/customstatemachine/model/State.java
+- [ ] T015 [P] [US1] Implementar objeto de valor imutável Event em src/main/java/br/com/danilo/customstatemachine/model/Event.java
+- [ ] T016 [P] [US1] Implementar Transition imutável com Guard opcional em src/main/java/br/com/danilo/customstatemachine/model/Transition.java
+- [ ] T017 [P] [US1] Implementar InternalTransition imutável em src/main/java/br/com/danilo/customstatemachine/model/InternalTransition.java
+- [ ] T018 [US1] Implementar construtor e getters de StateMachineDefinition imutável em src/main/java/br/com/danilo/customstatemachine/model/StateMachineDefinition.java
+- [ ] T019 [US1] Implementar regras de duplicata e pertencimento em src/main/java/br/com/danilo/customstatemachine/validation/DefinitionValidator.java
 
-**Checkpoint**: Runtime transition behavior and guard logic are deterministic and test-covered.
-
----
-
-## Phase 5: User Story 3 - Fail Fast On Invalid Usage (Priority: P3)
-
-**Goal**: Provide explicit null validation and failure behavior with state preservation.
-
-**Independent Test**: Attempt null inputs and unsupported events; verify explicit failures and unchanged current state.
-
-### Tests for User Story 3
-
-- [X] T026 [P] [US3] Add null input validation tests for definition and runtime APIs in src/test/java/br/com/danilo/customstatemachine/unit/NullInputValidationTest.java
-- [X] T027 [P] [US3] Add failure-path integration tests for state preservation in src/test/java/br/com/danilo/customstatemachine/integration/FailurePathIntegrationTest.java
-- [X] T028 [P] [US3] Add contract assertions for validation-error outcomes in src/test/java/br/com/danilo/customstatemachine/contract/StateMachineContractTest.java
-
-### Implementation for User Story 3
-
-- [X] T029 [US3] Implement definition-level null validations with explicit messages in src/main/java/br/com/danilo/customstatemachine/model/StateMachineDefinition.java
-- [X] T030 [US3] Implement runtime null validations for event/context inputs in src/main/java/br/com/danilo/customstatemachine/runtime/StateMachine.java
-- [X] T031 [US3] Implement validation error result creation and message standardization in src/main/java/br/com/danilo/customstatemachine/validation/DefinitionValidator.java and src/main/java/br/com/danilo/customstatemachine/runtime/TransitionResult.java
-
-**Checkpoint**: Invalid usage is rejected explicitly and safely.
+**Checkpoint**: Definição de máquina é explícita, imutável e validada.
 
 ---
 
-## Phase 6: Polish & Cross-Cutting Concerns
+## Fase 4: História de Usuário 2 - Consultar Eventos Disponíveis (Prioridade: P2)
 
-**Purpose**: Final consistency, documentation alignment, and end-to-end verification.
+**Objetivo**: Executar consulta declarativa de disponibilidade de eventos com comportamento ciente de guard.
 
-- [X] T032 [P] Document final usage examples and behavior matrix in README.md
-- [X] T033 [P] Align execution/verification steps with implemented behavior in specs/001-simple-state-machine/quickstart.md
-- [X] T034 [P] Update implementation notes if behavior changed during build in specs/001-simple-state-machine/plan.md and specs/001-simple-state-machine/research.md
-- [X] T035 Run full test suite and capture completion evidence in specs/001-simple-state-machine/checklists/requirements.md
+**Teste Independente**: Chamar getAvailableEvents(DRAFT, context), getAvailableEvents(SUBMITTED, context) e verificar disponibilidade correta com lógica de guard.
+
+### Testes para História de Usuário 2
+
+- [ ] T020 [P] [US2] Adicionar teste de fluxo de integração feliz em src/test/java/br/com/danilo/customstatemachine/integration/AvailableEventQueryIntegrationTest.java
+- [ ] T021 [P] [US2] Adicionar testes de unit de aprovação e negação de guard em src/test/java/br/com/danilo/customstatemachine/unit/GuardEvaluationTest.java
+- [ ] T022 [P] [US2] Adicionar testes de unit de internalTransition em src/test/java/br/com/danilo/customstatemachine/unit/InternalTransitionQueryTest.java
+
+### Implementação para História de Usuário 2
+
+- [ ] T023 [US2] Implementar serviço de consulta StateMachine em src/main/java/br/com/danilo/customstatemachine/query/StateMachine.java
+- [ ] T024 [US2] Implementar método getAvailableEvents com filtro de rules por sourceState em src/main/java/br/com/danilo/customstatemachine/query/StateMachine.java
+- [ ] T025 [US2] Implementar avaliação de guard e criação de AvailableEvent em src/main/java/br/com/danilo/customstatemachine/query/StateMachine.java
+- [ ] T026 [US2] Implementar AvailableEvent como resultado de consulta em src/main/java/br/com/danilo/customstatemachine/model/AvailableEvent.java
+- [ ] T027 [US2] Finalizar mapeamento de resultado para sucesso, estado desconhecido e validação em src/main/java/br/com/danilo/customstatemachine/query/AvailableEventResult.java
+
+**Checkpoint**: Comportamento de consulta declarativa e lógica de guard são determinísticos e cobertos por teste.
 
 ---
 
-## Dependencies & Execution Order
+## Fase 5: História de Usuário 3 - Falhar Rápido em Uso Inválido (Prioridade: P3)
 
-### Phase Dependencies
+**Objetivo**: Fornecer validação explícita nula e comportamento de falha.
 
-- Phase 1 (Setup): no dependencies.
-- Phase 2 (Foundational): depends on Phase 1 and blocks all user stories.
-- Phase 3 (US1): depends on Phase 2.
-- Phase 4 (US2): depends on Phase 2 and reuses US1 definition components.
-- Phase 5 (US3): depends on Phase 2 and extends failure behavior from US2 runtime paths.
-- Phase 6 (Polish): depends on completion of desired user stories.
+**Teste Independente**: Tentar entradas nulas e state desconhecido; verificar falhas explícitas.
 
-### User Story Dependencies
+### Testes para História de Usuário 3
 
-- US1 (P1): first deliverable and MVP baseline.
-- US2 (P2): depends on US1 domain definition artifacts.
-- US3 (P3): depends on US2 runtime execution surface.
+- [ ] T028 [P] [US3] Adicionar testes de validação de entrada nula para definição e APIs de consulta em src/test/java/br/com/danilo/customstatemachine/unit/NullInputValidationTest.java
+- [ ] T029 [P] [US3] Adicionar testes de integração de caminho de falha em src/test/java/br/com/danilo/customstatemachine/integration/FailurePathIntegrationTest.java
+- [ ] T030 [P] [US3] Adicionar assertivas de contrato de validação em src/test/java/br/com/danilo/customstatemachine/contract/StateMachineQueryContractTest.java
 
-### Within Each User Story
+### Implementação para História de Usuário 3
 
-- Tests are written before or alongside implementation and must fail before code completion.
-- Value objects and contracts before orchestration behavior.
-- Runtime behavior before final documentation updates.
+- [ ] T031 [US3] Implementar validações nulas em nível de definição com mensagens explícitas em src/main/java/br/com/danilo/customstatemachine/model/StateMachineDefinition.java
+- [ ] T032 [US3] Implementar validações nulas de tempo de consulta para entradas currentState/context em src/main/java/br/com/danilo/customstatemachine/query/StateMachine.java
+- [ ] T033 [US3] Implementar tratamento de state desconhecido com resultado explícito em src/main/java/br/com/danilo/customstatemachine/query/AvailableEventResult.java
 
-## Parallel Opportunities
+**Checkpoint**: Uso inválido é rejeitado explicitamente e com segurança.
 
-- T003 and T004 can run in parallel during setup.
-- T008 can run in parallel with T007 in foundational phase.
-- US1 tasks T011/T012/T013 and T014/T015/T016 can run in parallel by file.
-- US2 tests T019/T020/T021 can run in parallel.
-- US3 tests T026/T027/T028 can run in parallel.
-- Polish tasks T032/T033/T034 can run in parallel.
+---
 
-## Parallel Example: User Story 1
+## Fase 6: Polish & Preocupações Trans-Cortes
+
+**Propósito**: Consistência final, alinhamento de documentação e verificação end-to-end.
+
+- [ ] T034 [P] Documentar exemplos de uso final e matriz de comportamento em README.md
+- [ ] T035 [P] Alinhar etapas de execução/verificação com comportamento implementado em specs/001-simple-state-machine/quickstart.md
+- [ ] T036 [P] Atualizar notas de implementação se o comportamento mudou durante a construção em specs/001-simple-state-machine/plan.md e specs/001-simple-state-machine/research.md
+- [ ] T037 Executar suite de teste completa e capturar evidência de conclusão em specs/001-simple-state-machine/checklists/requirements.md
+
+---
+
+## Dependências & Ordem de Execução
+
+### Dependências de Fase
+
+- Fase 1 (Setup): sem dependências.
+- Fase 2 (Fundacional): depende da Fase 1 e bloqueia todas as histórias de usuário.
+- Fase 3 (US1): depende da Fase 2.
+- Fase 4 (US2): depende da Fase 2 e reutiliza componentes de definição US1.
+- Fase 5 (US3): depende da Fase 2 e estende comportamento de falha de caminhos de consulta US2.
+- Fase 6 (Polish): depende de conclusão de histórias de usuário desejadas.
+
+### Dependências de História de Usuário
+
+- US1 (P1): primeiro entregavel e linha de base MVP.
+- US2 (P2): depende de artefatos de definição de domínio US1.
+- US3 (P3): depende de surface de consulta US2.
+
+### Dentro de Cada História de Usuário
+
+- Testes são escritos antes ou ao lado de implementação e devem falhar antes da conclusão do código.
+- Objetos de valor e contratos antes de comportamento de orquestração.
+- Comportamento de consulta antes de atualizações finais de documentação.
+
+## Oportunidades Paralelas
+
+- T003 e T004 podem rodar em paralelo durante setup.
+- T008 pode rodar em paralelo com T007 em fase fundacional.
+- Tarefas US1 T011/T012/T013 e T014/T015/T016/T017 podem rodar em paralelo por arquivo.
+- Testes US2 T020/T021/T022 podem rodar em paralelo.
+- Testes US3 T028/T029/T030 podem rodar em paralelo.
+- Tarefas Polish T034/T035/T036 podem rodar em paralelo.
+
+## Exemplo Paralelo: História de Usuário 1
 
 ```bash
-# Parallel test authoring
-Task: "T011 [US1] Definition validation tests in src/test/java/br/com/danilo/customstatemachine/unit/DefinitionValidationTest.java"
-Task: "T012 [US1] Duplicate transition tests in src/test/java/br/com/danilo/customstatemachine/unit/DuplicateTransitionDetectionTest.java"
-Task: "T013 [US1] Contract tests in src/test/java/br/com/danilo/customstatemachine/contract/StateMachineContractTest.java"
+# Autoria de teste paralela
+Task: "T011 [US1] Testes de validação de definição em src/test/java/br/com/danilo/customstatemachine/unit/DefinitionValidationTest.java"
+Task: "T012 [US1] Testes de detecção de regra duplicada em src/test/java/br/com/danilo/customstatemachine/unit/DuplicateRuleDetectionTest.java"
+Task: "T013 [US1] Testes de contrato em src/test/java/br/com/danilo/customstatemachine/contract/StateMachineQueryContractTest.java"
 
-# Parallel model implementation
-Task: "T014 [US1] State value object in src/main/java/br/com/danilo/customstatemachine/model/State.java"
-Task: "T015 [US1] Event value object in src/main/java/br/com/danilo/customstatemachine/model/Event.java"
-Task: "T016 [US1] Transition value object in src/main/java/br/com/danilo/customstatemachine/model/Transition.java"
+# Implementação de modelo paralela
+Task: "T014 [US1] Objeto de valor State em src/main/java/br/com/danilo/customstatemachine/model/State.java"
+Task: "T015 [US1] Objeto de valor Event em src/main/java/br/com/danilo/customstatemachine/model/Event.java"
+Task: "T016 [US1] Objeto de valor Transition em src/main/java/br/com/danilo/customstatemachine/model/Transition.java"
+Task: "T017 [US1] Objeto de valor InternalTransition em src/main/java/br/com/danilo/customstatemachine/model/InternalTransition.java"
 ```
 
-## Parallel Example: User Story 2
+## Exemplo Paralelo: História de Usuário 2
 
 ```bash
-Task: "T019 [US2] Example flow integration test in src/test/java/br/com/danilo/customstatemachine/integration/ExampleFlowIntegrationTest.java"
-Task: "T020 [US2] Guard evaluation tests in src/test/java/br/com/danilo/customstatemachine/unit/GuardEvaluationTest.java"
-Task: "T021 [US2] Invalid transition tests in src/test/java/br/com/danilo/customstatemachine/unit/InvalidTransitionHandlingTest.java"
+Task: "T020 [US2] Teste de integração de fluxo de consulta em src/test/java/br/com/danilo/customstatemachine/integration/AvailableEventQueryIntegrationTest.java"
+Task: "T021 [US2] Testes de avaliação de guard em src/test/java/br/com/danilo/customstatemachine/unit/GuardEvaluationTest.java"
+Task: "T022 [US2] Testes de consulta de internalTransition em src/test/java/br/com/danilo/customstatemachine/unit/InternalTransitionQueryTest.java"
 ```
 
-## Parallel Example: User Story 3
+## Exemplo Paralelo: História de Usuário 3
 
 ```bash
-Task: "T026 [US3] Null input tests in src/test/java/br/com/danilo/customstatemachine/unit/NullInputValidationTest.java"
-Task: "T027 [US3] Failure-path integration tests in src/test/java/br/com/danilo/customstatemachine/integration/FailurePathIntegrationTest.java"
-Task: "T028 [US3] Validation contract assertions in src/test/java/br/com/danilo/customstatemachine/contract/StateMachineContractTest.java"
+Task: "T028 [US3] Testes de validação de entrada nula em src/test/java/br/com/danilo/customstatemachine/unit/NullInputValidationTest.java"
+Task: "T029 [US3] Testes de integração de caminho de falha em src/test/java/br/com/danilo/customstatemachine/integration/FailurePathIntegrationTest.java"
+Task: "T030 [US3] Assertivas de contrato de validação em src/test/java/br/com/danilo/customstatemachine/contract/StateMachineQueryContractTest.java"
 ```
 
-## Implementation Strategy
+## Estratégia de Implementação
 
-### MVP First (User Story 1 Only)
+### MVP Primeiro (Apenas História de Usuário 1)
 
-1. Complete Phase 1 and Phase 2.
-2. Deliver US1 in Phase 3.
-3. Validate immutability and duplicate detection as MVP acceptance.
+1. Completar Fase 1 e Fase 2.
+2. Entregar US1 em Fase 3.
+3. Validar imutabilidade e detecção de duplicata como aceitação MVP.
 
-### Incremental Delivery
+### Entrega Incremental
 
-1. Deliver US1 (definition correctness and immutability).
-2. Deliver US2 (runtime transitions and guard logic).
-3. Deliver US3 (null validation and failure-path guarantees).
-4. Finish with Phase 6 documentation and full-suite verification.
+1. Entregar US1 (correção de definição e imutabilidade).
+2. Entregar US2 (consulta de disponibilidade e lógica de guard).
+3. Entregar US3 (validação nula e garantías de caminho de falha).
+4. Finalizar com Fase 6 documentação e verificação de suite completa.
 
-### Constitution Alignment During Execution
+### Alinhamento de Constituição Durante Execução
 
-1. Keep model concepts explicit in package/class naming.
-2. Reject framework or code-generation additions.
-3. Preserve immutable definition behavior across refactors.
-4. Keep documentation updated when behavior changes.
+1. Manter conceitos de modelo explícitos em nomenclatura de pacote/classe.
+2. Rejeitar adições de framework ou geração de código.
+3. Preservar comportamento de definição imutável através de refatorações.
+4. Manter documentação atualizada quando o comportamento muda.

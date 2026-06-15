@@ -1,88 +1,104 @@
-# Data Model: simple-state-machine
+# Modelo de Dados: simple-state-machine
 
-## Entity: State
-- Purpose: Represents a named workflow state.
-- Fields:
-  - `name` (String, required, non-blank)
-- Constraints:
-  - Equality by value (`name`).
-  - Immutable value object.
+## Entidade: State
+- Propósito: Representa um state nomeado de fluxo de trabalho.
+- Campos:
+  - `name` (String, obrigatório, não vazio)
+- Restrições:
+  - Igualdade por valor (`name`).
+  - Objeto de valor imutável.
 
-## Entity: Event
-- Purpose: Represents a named trigger for transition attempts.
-- Fields:
-  - `name` (String, required, non-blank)
-- Constraints:
-  - Equality by value (`name`).
-  - Immutable value object.
+## Entidade: Event
+- Propósito: Representa um gatilho nomeado para consultas de disponibilidade.
+- Campos:
+  - `name` (String, obrigatório, não vazio)
+- Restrições:
+  - Igualdade por valor (`name`).
+  - Objeto de valor imutável.
 
-## Entity: TransitionContext
-- Purpose: Carries caller-provided data used by guard evaluation.
-- Fields:
-  - `attributes` (Map<String, Object>, optional, immutable view)
-- Constraints:
-  - Must tolerate empty context.
-  - Null context handling is explicit and validated by API contract.
+## Entidade: GuardContext
+- Propósito: Carrega atributos tipados fornecidos pelo chamador para avaliação de guard.
+- Campos:
+  - `attributes` (Map<String, ?>, somente leitura, opcional)
+- Restrições:
+  - Deve tolerar contexto vazio.
+  - Manipulação de contexto nulo é explícita e validada por contrato de API.
+  - Sem acesso a mudança de state.
 
-## Entity: Guard
-- Purpose: Evaluates whether a candidate transition is allowed for a given context.
-- Fields:
-  - `name` (String, optional, descriptive)
-  - `predicate` (function contract: context -> boolean)
-- Constraints:
-  - Explicit concept in domain model.
-  - Composition-based usage inside Transition.
+## Entidade: Guard
+- Propósito: Avalia se um event pode ser retornado como disponível para um contexto fornecido.
+- Campos:
+  - `name` (String, opcional, descritivo)
+  - `predicate` (contrato de função: GuardContext -> boolean)
+- Restrições:
+  - Conceito explícito no modelo de domínio.
+  - Uso baseado em composição dentro de Transition/InternalTransition.
 
-## Entity: Transition
-- Purpose: Defines an allowed move from source state to target state on an event.
-- Fields:
-  - `sourceState` (State, required)
-  - `event` (Event, required)
-  - `targetState` (State, required)
-  - `guard` (Guard, optional)
-- Constraints:
-  - `(sourceState, event)` pair must be unique in one definition.
-  - Immutable value object.
+## Entidade: Transition
+- Propósito: Define uma regra declarativa de move potencial de source state para target state em um event.
+- Campos:
+  - `sourceState` (State, obrigatório)
+  - `event` (Event, obrigatório)
+  - `targetState` (State, obrigatório)
+  - `guard` (Guard, opcional)
+- Restrições:
+  - Pair `(sourceState, event, EXTERNAL_TYPE)` deve ser único em uma definição.
+  - Objeto de valor imutável.
 
-## Entity: StateMachineDefinition
-- Purpose: Immutable configuration for one state machine type.
-- Fields:
-  - `states` (Set<State>, required)
-  - `events` (Set<Event>, required)
-  - `transitions` (Set<Transition>, required)
-  - `initialState` (State, required)
-- Constraints:
-  - No mutation after construction.
-  - `initialState` must belong to `states`.
-  - Every transition state/event references declared entities.
-  - Duplicate `(sourceState, event)` transitions are rejected.
+## Entidade: InternalTransition
+- Propósito: Define uma regra declarativa de ação/event sem mudança de state.
+- Campos:
+  - `sourceState` (State, obrigatório)
+  - `event` (Event, obrigatório)
+  - `guard` (Guard, opcional)
+- Restrições:
+  - Pair `(sourceState, event, INTERNAL_TYPE)` deve ser único em uma definição.
+  - Objeto de valor imutável.
 
-## Entity: StateMachine
-- Purpose: Runtime executor using immutable definition and current state.
-- Fields:
-  - `definition` (StateMachineDefinition, required)
-  - `currentState` (State, mutable runtime field)
-- Constraints:
-  - Initialized at definition initial state.
-  - `fire(event, context)` validates nulls and resolves transition deterministically.
+## Entidade: AvailableEvent
+- Propósito: Representa um event/ação retornado como disponível para um currentState e GuardContext.
+- Campos:
+  - `event` (Event, obrigatório)
+  - `sourceState` (State, obrigatório)
+  - `isGuarded` (boolean, indica se guard foi aplicado e aprovou)
+  - `transitionType` (enum: EXTERNAL ou INTERNAL)
+- Restrições:
+  - Resultado imutável de uma consulta.
+  - Preserva informação de origem para rastreamento.
 
-## Entity: TransitionResult
-- Purpose: Standardized outcome for transition attempts.
-- Fields:
-  - `status` (enum-like: SUCCESS, INVALID_TRANSITION, GUARD_DENIED, VALIDATION_ERROR)
-  - `fromState` (State)
-  - `toState` (State, optional)
-  - `message` (String, optional)
-- Constraints:
-  - Must preserve current state on non-success outcomes.
+## Entidade: StateMachineDefinition
+- Propósito: Metadados imutáveis de configuração para um tipo de máquina de estados.
+- Campos:
+  - `states` (Set<State>, obrigatório)
+  - `events` (Set<Event>, obrigatório)
+  - `transitions` (Set<Transition>, obrigatório)
+  - `internalTransitions` (Set<InternalTransition>, obrigatório)
+  - `guards` (Set<Guard>, obrigatório)
+- Restrições:
+  - Sem mutação após a construção.
+  - Todo state/event/guard referenciado em transitions/internalTransitions deve ser declarado.
+  - Pares duplicados `(sourceState, event, transitionType)` são rejeitados.
 
-## Relationships
-- `StateMachineDefinition` contains many `State`, `Event`, `Transition`.
-- `Transition` references one source `State`, one `Event`, one target `State`, and optional `Guard`.
-- `StateMachine` depends on one immutable `StateMachineDefinition`.
-- `StateMachine.fire(...)` produces one `TransitionResult` per call.
+## Entidade: StateMachine
+- Propósito: Serviço de consulta sobre um StateMachineDefinition imutável.
+- Campos:
+  - `definition` (StateMachineDefinition, obrigatório)
+- Métodos Principais:
+  - `getAvailableEvents(currentState, guardContext)` -> Collection<AvailableEvent>
+- Restrições:
+  - Sem estado interno mutável.
+  - Valida entradas nulas explicitamente.
+  - Sem execução de ciclo de workflow.
 
-## State Transitions (example flow)
-- `DRAFT + SUBMIT -> SUBMITTED`
-- `SUBMITTED + APPROVE -> APPROVED`
-- `SUBMITTED + REJECT -> REJECTED`
+## Relacionamentos
+- `StateMachineDefinition` contém muitos `State`, `Event`, `Transition`, `InternalTransition`.
+- `Transition` referencia um source `State`, um `Event`, um target `State` e `Guard` opcional.
+- `InternalTransition` referencia um source `State`, um `Event` e `Guard` opcional.
+- `StateMachine` depende de um `StateMachineDefinition` imutável.
+- `StateMachine.getAvailableEvents(...)` produz uma Collection<AvailableEvent> por chamada.
+
+## Fluxo de Estados (exemplo)
+- `DRAFT + SUBMIT -> SUBMITTED` (Transition)
+- `SUBMITTED + APPROVE -> APPROVED` (Transition)
+- `SUBMITTED + REJECT -> REJECTED` (Transition)
+- `SUBMITTED + VIEW_DETAILS` (InternalTransition, sem mudança de state)

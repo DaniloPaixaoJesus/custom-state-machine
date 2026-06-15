@@ -1,120 +1,121 @@
-# Feature Specification: simple-state-machine
+# Especificação da Feature: simple-state-machine
 
 **Feature Branch**: `[001-simple-state-machine]`
 
-**Created**: 2026-06-14
+**Criado**: 2026-06-14
 
-**Status**: Draft
+**Status**: Rascunho
 
-**Input**: User description: "Create the first feature specification for this repository for a simple state machine proof of concept with explicit state machine concepts, immutable definition, guarded transitions, and robust validation."
+**Input**: Descrição do usuário: "Evoluir a feature para um modelo declarativo de metadados de máquina de estados, usado para determinar eventos/ações disponíveis para um state e context atuais, sem executar ciclo de vida completo de workflow."
 
-## User Scenarios & Testing *(mandatory)*
+## Cenários de Usuário e Testes *(obrigatório)*
 
-### User Story 1 - Define A Deterministic Machine (Priority: P1)
+### História de Usuário 1 - Definir Metadados Declarativos Imutáveis (Prioridade: P1)
 
-As a library consumer, I want to define a state machine with explicit states, events,
-transitions, and an initial state so that I can model a business flow unambiguously.
+Como consumidor da biblioteca, quero definir um catálogo declarativo de states, events,
+guards e transitions (incluindo InternalTransition), para centralizar regras de disponibilidade de ações.
 
-**Why this priority**: Without deterministic machine definition, no runtime behavior can be trusted or tested.
+**Por que esta prioridade**: Sem metadados declarativos e imutáveis, não há base confiável para consultar ações disponíveis por state/context.
 
-**Independent Test**: Can be fully tested by creating a machine definition for the sample flow and verifying that all expected transitions are registered exactly once.
+**Teste Independente**: Pode ser totalmente testada criando StateMachineDefinition com transitions externas e internas e validando imutabilidade e unicidade de regras.
 
-**Acceptance Scenarios**:
+**Cenários de Aceitação**:
 
-1. **Given** a definition with states DRAFT, SUBMITTED, APPROVED and REJECTED, and events SUBMIT, APPROVE and REJECT, **When** transitions are registered for DRAFT + SUBMIT and SUBMITTED + APPROVE and SUBMITTED + REJECT, **Then** the definition is accepted as valid.
-2. **Given** an existing transition for SUBMITTED + APPROVE, **When** the same source-state and event pair is registered again, **Then** definition creation fails with a duplicate transition error.
-3. **Given** a completed machine definition, **When** a consumer attempts to change transitions or initial state after creation, **Then** the definition remains unchanged.
-
----
-
-### User Story 2 - Move Between States Safely (Priority: P2)
-
-As a runtime user of the state machine, I want to fire events and move between states only when allowed so that current state always reflects valid workflow progress.
-
-**Why this priority**: Runtime transition execution is the main user value delivered by the library.
-
-**Independent Test**: Can be fully tested by starting in DRAFT, firing SUBMIT then APPROVE, and verifying resulting states after each event.
-
-**Acceptance Scenarios**:
-
-1. **Given** current state DRAFT and a valid transition DRAFT + SUBMIT -> SUBMITTED, **When** SUBMIT is fired, **Then** current state becomes SUBMITTED.
-2. **Given** current state SUBMITTED and transition SUBMITTED + APPROVE -> APPROVED with a guard that approves the context, **When** APPROVE is fired with that context, **Then** current state becomes APPROVED.
-3. **Given** current state SUBMITTED and transition SUBMITTED + REJECT -> REJECTED with a guard that denies the context, **When** REJECT is fired with that context, **Then** state remains SUBMITTED and denial is returned explicitly.
+1. **Given** uma definição com states DRAFT, SUBMITTED, APPROVED e REJECTED, e events SUBMIT, APPROVE, REJECT e VIEW_DETAILS, **When** transitions externas e InternalTransition são registradas para esses elementos, **Then** a definição é aceita como válida.
+2. **Given** uma regra existente para o mesmo par (sourceState, event) dentro do mesmo tipo de transition, **When** o par é registrado novamente, **Then** a criação da definição falha com erro de regra duplicada.
+3. **Given** uma definição concluída, **When** um consumidor tenta alterar states, events, guards ou transitions após a criação, **Then** a definição permanece inalterada.
 
 ---
 
-### User Story 3 - Fail Fast On Invalid Usage (Priority: P3)
+### História de Usuário 2 - Consultar Eventos/Ações Disponíveis (Prioridade: P2)
 
-As a library consumer, I want explicit handling for invalid transitions and invalid inputs so that integration mistakes are detected immediately.
+Como usuário da biblioteca, quero consultar getAvailableEvents(currentState, context) para descobrir quais events/actions estão disponíveis no state atual.
 
-**Why this priority**: Fast, explicit failure prevents hidden state corruption and reduces debugging effort.
+**Por que esta prioridade**: A consulta declarativa de disponibilidade é o principal valor da feature e substitui a execução de ciclo de vida completo.
 
-**Independent Test**: Can be fully tested by attempting unsupported events and null inputs and verifying deterministic errors without state mutation.
+**Teste Independente**: Pode ser totalmente testada consultando eventos disponíveis para diferentes combinations de state/context e verificando inclusão/exclusão por guard.
 
-**Acceptance Scenarios**:
+**Cenários de Aceitação**:
 
-1. **Given** current state APPROVED with no APPROVED + REJECT transition, **When** REJECT is fired, **Then** operation returns invalid transition outcome and state remains APPROVED.
-2. **Given** a transition operation request, **When** required inputs are null, **Then** operation fails with explicit validation errors.
+1. **Given** currentState DRAFT e regra não guardada DRAFT + SUBMIT, **When** getAvailableEvents(DRAFT, context) é chamado, **Then** SUBMIT é retornado como disponível.
+2. **Given** currentState SUBMITTED e regra guardada para APPROVE com guard aprovando o GuardContext, **When** getAvailableEvents(SUBMITTED, contextAprovado) é chamado, **Then** APPROVE é retornado como disponível.
+3. **Given** currentState SUBMITTED e regra guardada para REJECT com guard negando o GuardContext, **When** getAvailableEvents(SUBMITTED, contextNegado) é chamado, **Then** REJECT não é retornado como disponível.
 
 ---
 
-### Edge Cases
+### História de Usuário 3 - Tratar Entradas Inválidas de Consulta (Prioridade: P3)
 
-- What happens when a transition has no guard configured? The transition proceeds based on state and event match only.
-- How does system handle guard evaluation that denies transition? Transition is blocked and current state remains unchanged.
-- What happens when an event is fired from a state with no matching transition? A deterministic invalid transition outcome is returned.
-- What happens when state machine is initialized with an initial state not present in definition? Initialization fails with explicit validation error.
+Como consumidor da biblioteca, quero tratamento explícito para state desconhecido e entradas inválidas nas consultas de disponibilidade.
 
-## Requirements *(mandatory)*
+**Por que esta prioridade**: Falha rápida e explícita reduz erro de integração e evita decisões incorretas de UI/serviço sobre ações disponíveis.
 
-### Functional Requirements
+**Teste Independente**: Pode ser totalmente testada com currentState desconhecido e entradas nulas, verificando resposta explícita e determinística.
 
-- **FR-001**: System MUST allow explicit definition of State as a first-class domain concept.
-- **FR-002**: System MUST allow explicit definition of Event as a first-class domain concept.
-- **FR-003**: System MUST allow explicit definition of Transition as a first-class domain concept linking source state, event, and target state.
-- **FR-004**: System MUST allow explicit definition of Guard as a first-class domain concept that evaluates a transition context.
-- **FR-005**: System MUST expose StateMachine as a first-class domain concept containing runtime current state.
-- **FR-006**: System MUST support creation of a machine definition that becomes immutable after creation.
-- **FR-007**: System MUST initialize runtime current state from a valid configured initial state.
-- **FR-008**: System MUST attempt state transition when an event is fired from the current state.
-- **FR-009**: System MUST evaluate guard before applying guarded transitions and only change state on guard approval.
-- **FR-010**: System MUST return explicit invalid transition handling when no matching transition exists for current state and event.
-- **FR-011**: System MUST detect duplicate transition definitions for the same source-state and event combination during definition creation.
-- **FR-012**: System MUST validate required inputs and reject null values with explicit validation errors.
-- **FR-013**: System MUST support the example flow DRAFT + SUBMIT -> SUBMITTED, SUBMITTED + APPROVE -> APPROVED, and SUBMITTED + REJECT -> REJECTED.
+**Cenários de Aceitação**:
 
-### Key Entities *(include if feature involves data)*
+1. **Given** currentState desconhecido pela definição, **When** getAvailableEvents(UNKNOWN, context) é chamado, **Then** a operação retorna resultado explícito de state inválido ou lista vazia com motivo explícito.
+2. **Given** uma solicitação de consulta, **When** entradas obrigatórias são nulas, **Then** a operação falha com erro explícito de validação.
 
-- **State**: Represents a workflow stage identifier used as source or target in transitions.
-- **Event**: Represents a trigger that requests movement from one state to another.
-- **Transition**: Represents a mapping of source state + event to target state, with optional guard.
-- **Guard**: Represents a rule that receives context and approves or denies a candidate transition.
-- **StateMachineDefinition**: Represents immutable configuration containing states, events, transitions, and initial state.
-- **StateMachine**: Represents runtime instance holding current state and exposing event firing behavior.
-- **TransitionContext**: Represents caller-provided data evaluated by guards during transition attempts.
+---
 
-## Success Criteria *(mandatory)*
+### Casos de Borda
 
-### Measurable Outcomes
+- O que acontece quando uma regra não tem guard configurado? O event é considerado disponível quando currentState corresponde ao sourceState.
+- Como o sistema trata InternalTransition? O event/ação deve poder ser retornado como disponível mesmo sem mudança de state.
+- O que acontece quando guard nega a regra? O event não é retornado na lista de disponíveis.
+- O que acontece com state desconhecido ou entradas nulas? O sistema retorna tratamento explícito e determinístico.
 
-- **SC-001**: 100% of configured valid transition scenarios in acceptance tests move to the expected target state.
-- **SC-002**: 100% of unsupported state-event combinations in acceptance tests return explicit invalid transition outcomes without state change.
-- **SC-003**: 100% of guard-denied transition attempts in acceptance tests preserve current state and return explicit denial outcomes.
-- **SC-004**: 100% of duplicate transition definitions in acceptance tests are rejected at definition creation time.
-- **SC-005**: 100% of null-input scenarios defined in acceptance tests are rejected with explicit validation outcomes.
+## Requisitos *(obrigatório)*
 
-## Assumptions
+### Requisitos Funcionais
 
-- The first release targets single-process usage and does not require distributed coordination.
-- Consumers provide stable identifiers for states and events within a machine definition.
-- Guard context schema is defined by consuming code and treated as opaque by the state machine core.
-- Persistence and visualization of machine state are out of scope for this feature.
+- **FR-001**: O sistema DEVE permitir definição explícita de State como conceito de domínio de primeira classe.
+- **FR-002**: O sistema DEVE permitir definição explícita de Event como conceito de domínio de primeira classe.
+- **FR-003**: O sistema DEVE permitir definição explícita de Transition (externa) ligando sourceState, event e targetState.
+- **FR-004**: O sistema DEVE permitir definição explícita de InternalTransition para ações/eventos que não alteram currentState.
+- **FR-005**: O sistema DEVE permitir definição explícita de Guard como conceito de domínio que avalia GuardContext.
+- **FR-006**: O sistema DEVE suportar criação de StateMachineDefinition imutável após a construção.
+- **FR-007**: O sistema DEVE expor operação de consulta getAvailableEvents(currentState, context).
+- **FR-008**: O sistema DEVE retornar apenas events/actions cujo sourceState corresponda ao currentState informado.
+- **FR-009**: O sistema DEVE incluir no resultado eventos não guardados quando houver match de state.
+- **FR-010**: O sistema DEVE incluir no resultado eventos guardados apenas quando o guard aprovar o GuardContext.
+- **FR-011**: O sistema DEVE excluir do resultado eventos guardados quando o guard negar o GuardContext.
+- **FR-012**: O sistema DEVE tratar explicitamente state desconhecido e entradas nulas com resultado/erro determinístico.
+- **FR-013**: O sistema DEVE rejeitar regras duplicadas por combinação inválida de (sourceState, event, transitionType) durante a criação da definição.
 
-## Constitution Alignment *(mandatory)*
+### Entidades-Chave *(incluir se a feature envolver dados)*
 
-- **CA-001 Framework-Free**: Feature remains framework-free and uses no Spring, Lombok, reflection wiring, or code generation.
-- **CA-002 Domain Visibility**: State, Event, Transition, Guard, and StateMachine are explicit entities in requirements, scenarios, and acceptance outcomes.
-- **CA-003 Immutability**: StateMachineDefinition is fixed after creation; any change requires a new definition instance.
-- **CA-004 Composition**: Guard behavior is composed into Transition behavior; no inheritance requirement is introduced by this feature.
-- **CA-005 Automated Tests**: Test scope includes valid transitions, invalid transitions, guard approval, guard denial, duplicate transitions, missing transitions, and null inputs.
-- **CA-006 Readability**: Feature scope favors explicit naming and constrained responsibilities over generic abstractions.
+- **State**: Representa um identificador de etapa de fluxo usado como origem ou destino em transitions.
+- **Event**: Representa um gatilho/ação nomeado para consulta de disponibilidade.
+- **Transition**: Representa regra declarativa externa de source state + event para target state, com guard opcional.
+- **InternalTransition**: Representa regra declarativa de ação/evento sem mudança de state.
+- **Guard**: Representa regra que recebe GuardContext e aprova ou nega disponibilidade de event.
+- **StateMachineDefinition**: Representa metadados imutáveis contendo states, events e regras de disponibilidade.
+- **AvailableEvent**: Representa event/ação retornado como disponível para um currentState e GuardContext.
+- **GuardContext**: Representa atributos tipados e somente leitura fornecidos pelo chamador para avaliação de guard.
+
+## Critérios de Sucesso *(obrigatório)*
+
+### Resultados Mensuráveis
+
+- **SC-001**: 100% dos cenários com regras não guardadas retornam os events esperados em getAvailableEvents(currentState, context).
+- **SC-002**: 100% dos cenários com guard aprovado retornam os events esperados como disponíveis.
+- **SC-003**: 100% dos cenários com guard negado não retornam os events correspondentes.
+- **SC-004**: 100% das definições com regras duplicadas inválidas são rejeitadas no momento de criação da definição.
+- **SC-005**: 100% dos cenários com state desconhecido ou entradas nulas produzem tratamento explícito e determinístico.
+
+## Premissas
+
+- A primeira versão tem como alvo uso em processo único e não requer coordenação distribuída.
+- Consumidores fornecem identificadores estáveis para states e events dentro de uma definição de máquina.
+- O schema de GuardContext é definido pelo código consumidor e tratado como tipado e somente leitura pelo núcleo.
+- Execução completa de ciclo de vida de workflow (com mutação interna de state da máquina) está fora de escopo desta feature.
+
+## Alinhamento com a Constituição *(obrigatório)*
+
+- **CA-001 Framework-Free**: A feature permanece framework-free e não usa Spring, Lombok, wiring por reflection ou geração de código.
+- **CA-002 Domain Visibility**: State, Event, Transition, InternalTransition, Guard, GuardContext e AvailableEvent são entidades explícitas em requisitos, cenários e resultados de aceitação.
+- **CA-003 Immutability**: StateMachineDefinition permanece fixo após a criação; qualquer mudança requer nova instância de definição.
+- **CA-004 Composition**: O comportamento de Guard é composto ao comportamento de Transition/InternalTransition; nenhum requisito de herança é introduzido por esta feature.
+- **CA-005 Automated Tests**: O escopo de testes inclui consulta de events disponíveis, aprovação de guard, negação de guard, regras duplicadas, state desconhecido e entradas nulas.
+- **CA-006 Readability**: O escopo da feature favorece nomenclatura explícita e responsabilidades restritas em vez de abstrações genéricas.

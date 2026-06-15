@@ -1,56 +1,58 @@
-# Library Contract: simple-state-machine
+# Contrato de Biblioteca: simple-state-machine
 
-## Public Contract Scope
-This contract describes expected behavior for a pure Java state machine library.
-It is intentionally framework-free and focused on deterministic domain behavior.
+## Escopo de Contrato Público
+Este contrato descreve comportamento esperado para uma biblioteca declarativa de máquina de estados
+Java pura. É intencionalmente framework-free e focada em comportamento de domínio determinístico
+de consulta de disponibilidade de eventos.
 
-## Required Concepts
-The library contract MUST expose these explicit first-class concepts:
+## Conceitos Obrigatórios
+O contrato de biblioteca DEVE expor estes conceitos explícitos de primeira classe:
 - `State`
 - `Event`
 - `Transition`
+- `InternalTransition`
 - `Guard`
-- `StateMachine`
+- `GuardContext`
+- `AvailableEvent`
 - `StateMachineDefinition`
-- `TransitionContext`
-- `TransitionResult`
+- `StateMachine` (serviço de consulta)
 
-## Definition Construction Contract
-- Consumers can construct a `StateMachineDefinition` from explicit states, events,
-  transitions, and an initial state.
-- Definition creation fails when:
-  - A required input is null.
-  - Initial state is not declared in states.
-  - Any transition references undeclared state/event.
-  - Duplicate transitions are provided for same `(sourceState, event)`.
-- After creation, definition is immutable.
+## Contrato de Construção de Definição
+- Consumidores podem construir um `StateMachineDefinition` a partir de states, events,
+  transitions externas, internalTransitions, guards e seus relacionamentos.
+- Criação de definição falha quando:
+  - Uma entrada obrigatória é nula.
+  - Qualquer transition/internalTransition referencia state/event não declarado.
+  - Pares duplicados `(sourceState, event, transitionType)` são fornecidos.
+- Após criação, definição é imutável.
 
-## Runtime Execution Contract
-- `StateMachine` starts at definition initial state.
-- `fire(event, context)` attempts transition using current state + event key.
-- If matching transition exists and guard approves (or guard is absent), transition
-  succeeds and current state updates to target state.
-- If no matching transition exists, result status is `INVALID_TRANSITION` and state
-  remains unchanged.
-- If guard denies, result status is `GUARD_DENIED` and state remains unchanged.
-- If input validation fails (e.g., null event), result status is `VALIDATION_ERROR`
-  or explicit validation error signaling as defined in implementation.
+## Contrato de Consulta de Disponibilidade
+- `StateMachine.getAvailableEvents(currentState, guardContext)` retorna Collection<AvailableEvent>.
+- Retorna apenas `AvailableEvent` cuja transition.sourceState corresponde ao currentState fornecido.
+- Para transitions não guardadas: event é sempre incluído quando state corresponde.
+- Para transitions guardadas: event é incluído apenas se guard aprova o guardContext.
+- Para internalTransitions não guardadas: event é sempre incluído.
+- Para internalTransitions guardadas: event é incluído apenas se guard aprova o guardContext.
+- Se currentState é desconhecido ou nulo: retorna lista vazia ou resultado explícito de invalid state.
+- Se guardContext é nulo: tratamento explícito conforme contrato de implementação.
 
-## Guard Contract
-- Guard receives `TransitionContext` and returns approval/denial decision.
-- Guard logic must not mutate machine definition.
-- Guard is optional at transition definition time.
+## Contrato de Guard
+- Guard recebe `GuardContext` tipado e retorna decisão de aprovação/negação.
+- Lógica de guard não deve mutar definição de máquina.
+- Lógica de guard não deve tentar acessar/mutar state actual.
+- Guard é opcional no tempo de definição de transition/internalTransition.
 
-## Mandatory Testable Behavior Matrix
-- Valid transition execution
-- Invalid transition handling
-- Guard approval path
-- Guard denial path
-- Duplicate transition detection
-- Missing transition path
-- Null input validation
+## Matriz de Comportamento Testável Obrigatório
+- Consulta de eventos não guardados
+- Aprovação de guard em consulta
+- Negação de guard em consulta
+- Detecção de transition duplicada
+- Internalransition em consulta de disponibilidade
+- State desconhecido/nulo em consulta
+- Validação de entrada nula
 
-## Non-Goals (Out of Scope)
-- Web endpoints or HTTP API contracts
-- Persistence or storage integration
-- Framework integration (Spring, Jakarta EE, etc.)
+## Não-Objetivos (Fora de Escopo)
+- Endpoints de web ou contratos de API HTTP
+- Persistência ou integração de armazenamento
+- Integração de framework (Spring, Jakarta EE, etc.)
+- Execução de ciclo de workflow com mutação de state interna

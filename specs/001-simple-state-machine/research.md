@@ -1,36 +1,36 @@
-# Research: simple-state-machine
+# Pesquisa: simple-state-machine
 
-## Decision 1: Pure Java 21 core with no runtime framework
-- Decision: Implement the state machine core using only Java 21 and standard library constructs.
-- Rationale: Directly satisfies constitution constraints (no Spring, no Lombok, no reflection, no code generation) and keeps behavior explicit.
-- Alternatives considered: Spring state machine style composition (rejected: violates framework-free rule); annotation-driven model (rejected: encourages reflection/code generation).
+## Decisão 1: Núcleo Java 21 puro sem framework de execução
+- Decisão: Implementar o núcleo da máquina de estados usando apenas Java 21 e construções de biblioteca padrão.
+- Fundamentação: Satisfaz diretamente restrições de constituição (sem Spring, sem Lombok, sem reflection, sem geração de código) e mantém comportamento explícito.
+- Alternativas consideradas: Composição estilo Spring state machine (rejeitada: viola regra framework-free); modelo orientado por anotações (rejeitada: incentiva reflection/geração de código).
 
-## Decision 2: Immutable definition, mutable runtime state
-- Decision: Keep `StateMachineDefinition` immutable and isolate runtime progression in `StateMachine` instance state.
-- Rationale: Preserves deterministic configuration while allowing valid runtime transition evolution.
-- Alternatives considered: Fully mutable definition (rejected: risks transition drift and violates constitution); fully immutable runtime machine returning copies only (deferred: unnecessary complexity for POC).
+## Decisão 2: Definição imutável, modelo declarativo de consulta
+- Decisão: Manter `StateMachineDefinition` imutável. Expor API de consulta `getAvailableEvents(currentState, context)` sem mutação interna de state da máquina.
+- Fundamentação: Preserva configuração determinística e oferece modelo declarativo puro para integrações verificarem disponibilidade antes de agir.
+- Alternativas consideradas: Execução de ciclo de workflow completo com fire(event) (rejeitada: fora de escopo e adiciona responsabilidade de estado); definição mutaável (rejeitada: risco de drift e viola constituição).
 
-## Decision 3: Transition lookup keyed by (sourceState, event)
-- Decision: Validate and store transitions with uniqueness on `(sourceState, event)` to enforce duplicate detection.
-- Rationale: Makes duplicate transition checks deterministic and directly aligned with feature requirements.
-- Alternatives considered: List-based scan per event (rejected: weaker duplicate guarantees and less clear error behavior).
+## Decisão 3: Lookup de regras indexado por (sourceState, event, tipoDeTransition)
+- Decisão: Validar e armazenar transitions/internalTransitions com exclusividade em `(sourceState, event, transitionType)` para impor detecção de duplicatas.
+- Fundamentação: Torna verificações de duplicatas determinísticas e diretamente alinhadas com requisitos de feature.
+- Alternativas consideradas: Varredura baseada em lista por event (rejeitada: garantías mais fracas de duplicatas e erro menos claro).
 
-## Decision 4: Guard as composable policy on transition
-- Decision: Model `Guard` as explicit domain concept evaluated before state change with context input.
-- Rationale: Composition-first design and clear extension point for approval/denial behavior.
-- Alternatives considered: Inheritance-based transition subclasses (rejected: adds hierarchy complexity without benefit).
+## Decisão 4: Guard como política componível sobre regra
+- Decisão: Modelar `Guard` como conceito de domínio explícito avaliado em consulta de disponibilidade com entrada de GuardContext tipado.
+- Fundamentação: Design composition-first e ponto explícito de extensão para comportamento de aprovação/negação.
+- Alternativas consideradas: Subclasses de transition baseadas em herança (rejeitada: adiciona complexidade de hierárquia sem benefício).
 
-## Decision 5: Explicit transition outcome model
-- Decision: Return a structured transition result that distinguishes success, invalid transition, guard denied, and validation error.
-- Rationale: Prevents ambiguous behavior and makes tests clear and deterministic.
-- Alternatives considered: Exception-only signaling for all outcomes (rejected: mixes business-invalid and exceptional validation concerns).
+## Decisão 5: Modelo de resultado explícito para consultas
+- Decisão: Retornar `AvailableEvent` estruturado que inclua event, transição subjacente, e indicação de guard (se houver).
+- Fundamentação: Impede comportamento ambíguo e torna testes claros e determinísticos.
+- Alternativas consideradas: Sinalização apenas por exceção (rejeitada: mistura preocupações de negado-por-guard com erros de validação).
 
-## Decision 6: Test strategy centered on mandatory behavior matrix
-- Decision: Implement JUnit 5 test suite with focused unit/integration/contract layers and optional AssertJ for readable assertions.
-- Rationale: Satisfies mandatory coverage list and supports test-first or test-alongside workflow.
-- Alternatives considered: Mockito-heavy tests (rejected unless strictly necessary); single large integration test only (rejected: low failure localization).
+## Decisão 6: Estratégia de teste centrada em matriz de comportamento obrigatório
+- Decisão: Implementar suite de teste JUnit 5 com camadas focadas unit/integration/contract e AssertJ para assertivas legíveis.
+- Fundamentação: Satisfaz lista de cobertura obrigatória e suporta fluxo test-first ou test-alongside.
+- Alternativas consideradas: Testes pesados com Mockito (rejeitada a não ser que estritamente necessário); apenas um único teste de integração grande (rejeitada: baixa localização de falha).
 
-## Decision 7: Package organization for readability
-- Decision: Use package root `br.com.danilo.customstatemachine` with `model`, `runtime`, and `validation` subpackages.
-- Rationale: Keeps first-class concepts visible and avoids generic utility buckets.
-- Alternatives considered: Flat package with many classes (rejected: poor navigability as project grows); generic `utils` package (rejected by constitution).
+## Decisão 7: Organização de pacote para legibilidade
+- Decisão: Usar raíz de pacote `br.com.danilo.customstatemachine` com subpacotes `model`, `query` e `validation`.
+- Fundamentação: Mantém conceitos de primeira classe visíveis e evita buckets de utilitário genéricos.
+- Alternativas consideradas: Pacote flat com muitas classes (rejeitada: navegabilidade fraca conforme projeto cresce); pacote genérico `utils` (rejeitada por constituição).

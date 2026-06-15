@@ -1,87 +1,79 @@
-# Implementation Plan: simple-state-machine
+# Plano de Implementação: simple-state-machine
 
-**Branch**: `[main]` | **Date**: 2026-06-14 | **Spec**: [spec.md](./spec.md)
+**Branch**: `[main]` | **Data**: 2026-06-14 | **Spec**: [spec.md](./spec.md)
 
-**Input**: Feature specification from `/specs/001-simple-state-machine/spec.md`
+**Input**: Especificação de feature de `/specs/001-simple-state-machine/spec.md`
 
-## Summary
+## Resumo
 
-Build a framework-free Java 21 library proof of concept that models a deterministic
-state machine with explicit State, Event, Transition, Guard, and StateMachine
-concepts. The plan uses immutable configuration objects for definition-time data and
-separates runtime state handling from configuration. Validation and behavior safety
-are enforced through mandatory JUnit 5 automated tests covering valid transitions,
-invalid transitions, guard approval and denial, duplicate transitions, missing
-transitions, and null input validation.
+Construir uma biblioteca Java 21 framework-free que modele uma máquina de estados
+com modelo declarativo de disponibilidade de eventos/ações. A consulta
+`getAvailableEvents(currentState, context)` retorna o conjunto de AvailableEvent
+filtrado por guard. Configuração imutável em definição, sem execução de ciclo de
+workflow. Validação e segurança de comportamento impostas por testes automatizados
+JUnit 5 mandatoriais.
 
-## Technical Context
+## Contexto Técnico
 
-**Language/Version**: Java 21
+**Linguagem/Versão**: Java 21
 
-**Primary Dependencies**: Maven + JUnit 5 (test), AssertJ (optional test assertions), Mockito (only if strictly needed)
+**Dependências Principais**: Maven + JUnit 5 (teste), AssertJ (assertivas de teste opcionais), Mockito (apenas se estritamente necessário)
 
-**Storage**: N/A
+**Armazenamento**: N/A
 
-**Testing**: JUnit 5 mandatory; AssertJ allowed; Mockito only if necessary
+**Testes**: JUnit 5 obrigatório; AssertJ permitido; Mockito apenas se necessário
 
-**Target Platform**: JVM (Java 21), local development and CI execution
+**Plataforma-alvo**: JVM (Java 21), desenvolvimento local e execução em CI
 
-**Project Type**: Library (pure Java, framework-free)
+**Tipo de Projeto**: Biblioteca (Java puro, framework-free)
 
-**Performance Goals**: Deterministic transition evaluation; sub-millisecond average transition evaluation in unit test scenarios
+**Objetivos de Performance**: Avaliação de disponibilidade determinística; média sub-milissegundo em cenários de teste unitário
 
-**Constraints**: No Spring, no Lombok, no reflection, no code generation, immutable machine definition, explicit domain concepts, descriptive naming, small methods
+**Restrições**: Sem Spring, sem Lombok, sem reflection, sem geração de código, definição de máquina imutável, conceitos de domínio explícitos, nomenclatura descritiva, métodos pequenos
 
-**Scale/Scope**: Small proof of concept library with one core domain package and focused test suite
+**Escala/Escopo**: Pequena biblioteca POC com pacote de domínio central único e suite de testes focada
 
-## Constitution Check
+## Verificação da Constituição
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+*GATE: Deve passar antes da Fase 0 pesquisa. Reverificar após design Fase 1.*
 
-- Framework-free Java gate: no Spring, Lombok, reflection-based runtime wiring,
-  or code generation in planned approach.
-- Domain model gate: State, Event, Transition, Guard, and StateMachine are explicit
-  first-class concepts in design artifacts.
-- Immutability gate: machine definition is immutable after construction.
-- Composition gate: composition-first approach; any inheritance is justified in
-  Complexity Tracking.
-- Testing gate: JUnit 5 test plan covers valid/invalid transitions, guard
-  approval/denial, duplicate transitions, missing transitions, and null inputs.
-- Readability gate: naming and module structure avoid generic Utils/Helpers/
-  Managers/Processors.
-- Agent discipline gate: plan references spec and tasks traceability, and includes
-  doc update expectations for behavior changes.
+- Verificação framework-free Java: sem Spring, Lombok, wiring por reflection,
+  ou geração de código em abordagem planejada.
+- Verificação do modelo de domínio: State, Event, Transition, Guard, InternalTransition e AvailableEvent são conceitos
+  explícitos de primeira classe no design.
+- Verificação de imutabilidade: definição de máquina é imutável após construção.
+- Verificação de composição: abordagem composition-first; qualquer herança é justificada no Complexity Tracking.
+- Verificação de testes: plano de teste JUnit 5 cobre consulta de eventos, aprovação de guard, negação de guard, regras duplicadas, state desconhecido e entradas nulas.
+- Verificação de legibilidade: nomenclatura e estrutura de módulos evitam Utils/Helpers/Managers/Processors genéricos.
+- Verificação de disciplina de agente: plano referencia rastreabilidade spec-plan-tasks e inclui expectativas de atualização de doc para mudanças de comportamento.
 
-### Pre-Phase 0 Gate Assessment
+### Avaliação do Gate Pré-Fase 0
 
-- Framework-free Java gate: PASS. Design constrained to Java standard library and
-  Maven test dependencies.
-- Domain model gate: PASS. Plan defines explicit classes/interfaces for State,
-  Event, Transition, Guard, StateMachine, plus definition/runtime separation.
-- Immutability gate: PASS. Definition objects are immutable value objects with
-  constructor-time validation.
-- Composition gate: PASS. Guard behavior and transition evaluation are composed;
-  inheritance is not required.
-- Testing gate: PASS. Test strategy explicitly includes all mandatory scenarios.
-- Readability gate: PASS. Naming and package layout avoid generic utility classes.
-- Agent discipline gate: PASS. Artifacts include contracts, data model, quickstart,
-  and traceable checks.
+- Verificação framework-free Java: PASSAR. Design restrito à biblioteca padrão Java e dependências de teste Maven.
+- Verificação do modelo de domínio: PASSAR. Plano define classes/interfaces explícitas para State,
+  Event, Transition, Guard, InternalTransition, AvailableEvent, GuardContext, StateMachineDefinition e separação de consulta.
+- Verificação de imutabilidade: PASSAR. Objetos de definição são objetos de valor imutáveis com validação em tempo de construção.
+- Verificação de composição: PASSAR. Comportamento de guard e avaliação de disponibilidade são compostos;
+  herança não é obrigatória.
+- Verificação de testes: PASSAR. Estratégia de teste inclui explicitamente todos os cenários obrigatórios.
+- Verificação de legibilidade: PASSAR. Nomenclatura e layout de pacotes evitam classes de utilitário genérico.
+- Verificação de disciplina de agente: PASSAR. Artefatos incluem contracts, modelo de dados, quickstart e verificações rastreavéis.
 
-## Project Structure
+## Estrutura do Projeto
 
-### Documentation (this feature)
+### Documentação (esta feature)
 
 ```text
 specs/001-simple-state-machine/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+├── plan.md              # Este arquivo (saída do comando /speckit.plan)
+├── research.md          # Saída da Fase 0 (comando /speckit.plan)
+├── data-model.md        # Saída da Fase 1 (comando /speckit.plan)
+├── quickstart.md        # Saída da Fase 1 (comando /speckit.plan)
+├── contracts/           # Saída da Fase 1 (comando /speckit.plan)
+└── tasks.md             # Saída da Fase 2 (comando /speckit.tasks - NÃO criada por /speckit.plan)
 ```
 
-### Source Code (repository root)
+### Código-Fonte (raíz do repositório)
 
 ```text
 pom.xml
@@ -96,12 +88,14 @@ src/
             │   ├── State.java
             │   ├── Event.java
             │   ├── Transition.java
+            │   ├── InternalTransition.java
             │   ├── Guard.java
-            │   ├── TransitionContext.java
+            │   ├── GuardContext.java
+            │   ├── AvailableEvent.java
             │   └── StateMachineDefinition.java
-            ├── runtime/
+            ├── query/
             │   ├── StateMachine.java
-            │   └── TransitionResult.java
+            │   └── AvailableEventResult.java
             └── validation/
               └── DefinitionValidator.java
 
@@ -113,35 +107,28 @@ src/
         └── danilo/
           └── customstatemachine/
             ├── contract/
-            │   └── StateMachineContractTest.java
+            │   └── StateMachineQueryContractTest.java
             ├── unit/
             │   ├── DefinitionValidationTest.java
             │   ├── GuardEvaluationTest.java
             │   └── NullInputValidationTest.java
             └── integration/
-              └── ExampleFlowIntegrationTest.java
+              └── AvailableEventQueryIntegrationTest.java
 ```
 
-**Structure Decision**: Single Maven library project selected. This structure keeps
-domain concepts explicit and isolated from runtime behavior while preserving a small,
-readable package layout suitable for a POC.
+**Decisão de Estrutura**: Projeto de biblioteca Maven único selecionado. Esta estrutura mantém
+conceitos de domínio explícitos e isolados enquanto preserva um layout de pacote pequeno e legível apropriado para um POC.
 
-## Complexity Tracking
+## Rastreamento de Complexidade
 
-No constitution violations require complexity justification for this plan.
+Nenhuma violação da constituição requer justificação de complexidade para este plano.
 
-### Post-Phase 1 Constitution Re-Check
+### Reverificação da Constituição Pós-Fase 1
 
-- Framework-free Java gate: PASS. Research and design artifacts specify no framework
-  runtime dependencies.
-- Domain model gate: PASS. Data model and contract keep domain concepts first-class
-  and explicit.
-- Immutability gate: PASS. StateMachineDefinition and related value objects remain
-  immutable after creation.
-- Composition gate: PASS. Guard and transition behavior use composition; no
-  inheritance dependency introduced.
-- Testing gate: PASS. Quickstart and contracts define mandatory JUnit 5 scenarios.
-- Readability gate: PASS. Artifact naming is descriptive and avoids generic helper
-  abstractions.
-- Agent discipline gate: PASS. Spec-plan-research-contract-data model quickstart
-  alignment is maintained.
+- Verificação framework-free Java: PASSAR. Artefatos de pesquisa e design especificam nenhuma dependência de tempo de execução de framework.
+- Verificação do modelo de domínio: PASSAR. Modelo de dados e contracts mantêm conceitos de domínio de primeira classe e explícitos.
+- Verificação de imutabilidade: PASSAR. StateMachineDefinition e objetos de valor relacionados permanecem imutáveis após criação.
+- Verificação de composição: PASSAR. Guard e comportamento de avaliação de disponibilidade usam composição; nenhuma dependência de herança introduzida.
+- Verificação de testes: PASSAR. Quickstart e contracts definem cenários obrigatórios de JUnit 5.
+- Verificação de legibilidade: PASSAR. Nomenclatura de artefato é descritiva e evita abstrações genéricas de auxiliar.
+- Verificação de disciplina de agente: PASSAR. Alinhamento spec-plan-research-contract-data model quickstart é mantido.
