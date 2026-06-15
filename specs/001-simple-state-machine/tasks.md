@@ -12,11 +12,11 @@
 
 **Purpose**: Initialize Maven project structure and baseline build/test configuration.
 
-- [ ] T001 Create Maven project descriptor with Java 21 settings in pom.xml
-- [ ] T002 Create source and test package directories under src/main/java/br/com/danilo/customstatemachine/ and src/test/java/br/com/danilo/customstatemachine/
-- [ ] T003 [P] Configure JUnit 5, AssertJ (optional usage), and Surefire plugin in pom.xml
-- [ ] T004 [P] Add project .gitignore entries for Maven build outputs in .gitignore
-- [ ] T005 Add feature usage and local test execution section in README.md
+- [X] T001 Create Maven project descriptor with Java 21 settings in pom.xml
+- [X] T002 Create source and test package directories under src/main/java/br/com/danilo/customstatemachine/ and src/test/java/br/com/danilo/customstatemachine/
+- [X] T003 [P] Configure JUnit 5, AssertJ (optional usage), and Surefire plugin in pom.xml
+- [X] T004 [P] Add project .gitignore entries for Maven build outputs in .gitignore
+- [X] T005 Add feature usage and local test execution section in README.md
 
 ---
 
@@ -26,11 +26,11 @@
 
 **CRITICAL**: No user story implementation starts before this phase is complete.
 
-- [ ] T006 Create transition status/result contract in src/main/java/br/com/danilo/customstatemachine/runtime/TransitionResult.java
-- [ ] T007 Create definition validator skeleton for shared invariants in src/main/java/br/com/danilo/customstatemachine/validation/DefinitionValidator.java
-- [ ] T008 [P] Create guard and context abstractions in src/main/java/br/com/danilo/customstatemachine/model/Guard.java and src/main/java/br/com/danilo/customstatemachine/model/TransitionContext.java
-- [ ] T009 Create reusable test fixtures for canonical states/events in src/test/java/br/com/danilo/customstatemachine/support/StateMachineFixtures.java
-- [ ] T010 Establish contract test class shell in src/test/java/br/com/danilo/customstatemachine/contract/StateMachineContractTest.java
+- [X] T006 Create transition status/result contract in src/main/java/br/com/danilo/customstatemachine/runtime/TransitionResult.java
+- [X] T007 Create definition validator skeleton for shared invariants in src/main/java/br/com/danilo/customstatemachine/validation/DefinitionValidator.java
+- [X] T008 [P] Create guard and context abstractions in src/main/java/br/com/danilo/customstatemachine/model/Guard.java and src/main/java/br/com/danilo/customstatemachine/model/TransitionContext.java
+- [X] T009 Create reusable test fixtures for canonical states/events in src/test/java/br/com/danilo/customstatemachine/support/StateMachineFixtures.java
+- [X] T010 Establish contract test class shell in src/test/java/br/com/danilo/customstatemachine/contract/StateMachineContractTest.java
 
 **Checkpoint**: Shared runtime and test foundations are ready.
 
@@ -44,17 +44,17 @@
 
 ### Tests for User Story 1
 
-- [ ] T011 [P] [US1] Add immutable definition and initial-state validation tests in src/test/java/br/com/danilo/customstatemachine/unit/DefinitionValidationTest.java
-- [ ] T012 [P] [US1] Add duplicate transition detection tests in src/test/java/br/com/danilo/customstatemachine/unit/DuplicateTransitionDetectionTest.java
-- [ ] T013 [P] [US1] Add contract tests for explicit domain concepts in src/test/java/br/com/danilo/customstatemachine/contract/StateMachineContractTest.java
+- [X] T011 [P] [US1] Add immutable definition and initial-state validation tests in src/test/java/br/com/danilo/customstatemachine/unit/DefinitionValidationTest.java
+- [X] T012 [P] [US1] Add duplicate transition detection tests in src/test/java/br/com/danilo/customstatemachine/unit/DuplicateTransitionDetectionTest.java
+- [X] T013 [P] [US1] Add contract tests for explicit domain concepts in src/test/java/br/com/danilo/customstatemachine/contract/StateMachineContractTest.java
 
 ### Implementation for User Story 1
 
-- [ ] T014 [P] [US1] Implement immutable State value object in src/main/java/br/com/danilo/customstatemachine/model/State.java
-- [ ] T015 [P] [US1] Implement immutable Event value object in src/main/java/br/com/danilo/customstatemachine/model/Event.java
-- [ ] T016 [P] [US1] Implement immutable Transition with optional Guard in src/main/java/br/com/danilo/customstatemachine/model/Transition.java
-- [ ] T017 [US1] Implement immutable StateMachineDefinition constructor and getters in src/main/java/br/com/danilo/customstatemachine/model/StateMachineDefinition.java
-- [ ] T018 [US1] Implement duplicate and membership rules in src/main/java/br/com/danilo/customstatemachine/validation/DefinitionValidator.java
+- [X] T014 [P] [US1] Implement immutable State value object in src/main/java/br/com/danilo/customstatemachine/model/State.java
+- [X] T015 [P] [US1] Implement immutable Event value object in src/main/java/br/com/danilo/customstatemachine/model/Event.java
+- [X] T016 [P] [US1] Implement immutable Transition with optional Guard in src/main/java/br/com/danilo/customstatemachine/model/Transition.java
+- [X] T017 [US1] Implement immutable StateMachineDefinition constructor and getters in src/main/java/br/com/danilo/customstatemachine/model/StateMachineDefinition.java
+- [X] T018 [US1] Implement duplicate and membership rules in src/main/java/br/com/danilo/customstatemachine/validation/DefinitionValidator.java
 
 **Checkpoint**: Machine definition is explicit, immutable, and validated.
 
@@ -68,16 +68,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T019 [P] [US2] Add happy-path integration flow test for DRAFT->SUBMITTED->APPROVED in src/test/java/br/com/danilo/customstatemachine/integration/ExampleFlowIntegrationTest.java
-- [ ] T020 [P] [US2] Add guard approval and denial unit tests in src/test/java/br/com/danilo/customstatemachine/unit/GuardEvaluationTest.java
-- [ ] T021 [P] [US2] Add invalid and missing transition unit tests in src/test/java/br/com/danilo/customstatemachine/unit/InvalidTransitionHandlingTest.java
+- [X] T019 [P] [US2] Add happy-path integration flow test for DRAFT->SUBMITTED->APPROVED in src/test/java/br/com/danilo/customstatemachine/integration/ExampleFlowIntegrationTest.java
+- [X] T020 [P] [US2] Add guard approval and denial unit tests in src/test/java/br/com/danilo/customstatemachine/unit/GuardEvaluationTest.java
+- [X] T021 [P] [US2] Add invalid and missing transition unit tests in src/test/java/br/com/danilo/customstatemachine/unit/InvalidTransitionHandlingTest.java
 
 ### Implementation for User Story 2
 
-- [ ] T022 [US2] Implement StateMachine runtime holder and current-state initialization in src/main/java/br/com/danilo/customstatemachine/runtime/StateMachine.java
-- [ ] T023 [US2] Implement transition lookup by source-state and event in src/main/java/br/com/danilo/customstatemachine/runtime/StateMachine.java
-- [ ] T024 [US2] Implement guard evaluation and transition application flow in src/main/java/br/com/danilo/customstatemachine/runtime/StateMachine.java
-- [ ] T025 [US2] Finalize TransitionResult outcome mapping for success, invalid transition, and guard denial in src/main/java/br/com/danilo/customstatemachine/runtime/TransitionResult.java
+- [X] T022 [US2] Implement StateMachine runtime holder and current-state initialization in src/main/java/br/com/danilo/customstatemachine/runtime/StateMachine.java
+- [X] T023 [US2] Implement transition lookup by source-state and event in src/main/java/br/com/danilo/customstatemachine/runtime/StateMachine.java
+- [X] T024 [US2] Implement guard evaluation and transition application flow in src/main/java/br/com/danilo/customstatemachine/runtime/StateMachine.java
+- [X] T025 [US2] Finalize TransitionResult outcome mapping for success, invalid transition, and guard denial in src/main/java/br/com/danilo/customstatemachine/runtime/TransitionResult.java
 
 **Checkpoint**: Runtime transition behavior and guard logic are deterministic and test-covered.
 
@@ -91,15 +91,15 @@
 
 ### Tests for User Story 3
 
-- [ ] T026 [P] [US3] Add null input validation tests for definition and runtime APIs in src/test/java/br/com/danilo/customstatemachine/unit/NullInputValidationTest.java
-- [ ] T027 [P] [US3] Add failure-path integration tests for state preservation in src/test/java/br/com/danilo/customstatemachine/integration/FailurePathIntegrationTest.java
-- [ ] T028 [P] [US3] Add contract assertions for validation-error outcomes in src/test/java/br/com/danilo/customstatemachine/contract/StateMachineContractTest.java
+- [X] T026 [P] [US3] Add null input validation tests for definition and runtime APIs in src/test/java/br/com/danilo/customstatemachine/unit/NullInputValidationTest.java
+- [X] T027 [P] [US3] Add failure-path integration tests for state preservation in src/test/java/br/com/danilo/customstatemachine/integration/FailurePathIntegrationTest.java
+- [X] T028 [P] [US3] Add contract assertions for validation-error outcomes in src/test/java/br/com/danilo/customstatemachine/contract/StateMachineContractTest.java
 
 ### Implementation for User Story 3
 
-- [ ] T029 [US3] Implement definition-level null validations with explicit messages in src/main/java/br/com/danilo/customstatemachine/model/StateMachineDefinition.java
-- [ ] T030 [US3] Implement runtime null validations for event/context inputs in src/main/java/br/com/danilo/customstatemachine/runtime/StateMachine.java
-- [ ] T031 [US3] Implement validation error result creation and message standardization in src/main/java/br/com/danilo/customstatemachine/validation/DefinitionValidator.java and src/main/java/br/com/danilo/customstatemachine/runtime/TransitionResult.java
+- [X] T029 [US3] Implement definition-level null validations with explicit messages in src/main/java/br/com/danilo/customstatemachine/model/StateMachineDefinition.java
+- [X] T030 [US3] Implement runtime null validations for event/context inputs in src/main/java/br/com/danilo/customstatemachine/runtime/StateMachine.java
+- [X] T031 [US3] Implement validation error result creation and message standardization in src/main/java/br/com/danilo/customstatemachine/validation/DefinitionValidator.java and src/main/java/br/com/danilo/customstatemachine/runtime/TransitionResult.java
 
 **Checkpoint**: Invalid usage is rejected explicitly and safely.
 
@@ -109,10 +109,10 @@
 
 **Purpose**: Final consistency, documentation alignment, and end-to-end verification.
 
-- [ ] T032 [P] Document final usage examples and behavior matrix in README.md
-- [ ] T033 [P] Align execution/verification steps with implemented behavior in specs/001-simple-state-machine/quickstart.md
-- [ ] T034 [P] Update implementation notes if behavior changed during build in specs/001-simple-state-machine/plan.md and specs/001-simple-state-machine/research.md
-- [ ] T035 Run full test suite and capture completion evidence in specs/001-simple-state-machine/checklists/requirements.md
+- [X] T032 [P] Document final usage examples and behavior matrix in README.md
+- [X] T033 [P] Align execution/verification steps with implemented behavior in specs/001-simple-state-machine/quickstart.md
+- [X] T034 [P] Update implementation notes if behavior changed during build in specs/001-simple-state-machine/plan.md and specs/001-simple-state-machine/research.md
+- [X] T035 Run full test suite and capture completion evidence in specs/001-simple-state-machine/checklists/requirements.md
 
 ---
 
